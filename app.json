@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Vinku-love",
+    "slug": "vinku-love",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#12121A",
+    "splash": {
+      "backgroundColor": "#12121A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.axel.vinkulove",
+      "backgroundColor": "#12121A",
+      "adaptiveIcon": {
+        "backgroundColor": "#12121A"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Vinku-love necesita acceso a tus fotos para guardarlas en la cápsula del tiempo."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#FF8B7E",
+          "androidMode": "default"
+        }
+      ]
+    ],
+    "extra": {
+      "supabaseUrl": "PON_AQUI_TU_SUPABASE_URL",
+      "supabaseAnonKey": "PON_AQUI_TU_SUPABASE_ANON_KEY",
+      "eas": {
+        "projectId": "SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD"
+      }
+    }
+  }
+}
