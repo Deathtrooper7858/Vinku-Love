@@ -305,6 +305,21 @@ function CapsulePanel() {
   const [unlockDate, setUnlockDate] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+
+  const loadUrls = useCallback(async (entriesList: any[]) => {
+    const pathsToSign = entriesList.map((e) => e.photo_path).filter(Boolean);
+    if (pathsToSign.length === 0) return;
+
+    const { data } = await supabase.storage.from('vinku-love-media').createSignedUrls(pathsToSign, 3600);
+    if (data) {
+      const urls: Record<string, string> = {};
+      data.forEach((d) => {
+        if (d.signedUrl && d.path) urls[d.path] = d.signedUrl;
+      });
+      setPhotoUrls((prev) => ({ ...prev, ...urls }));
+    }
+  }, []);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -312,8 +327,11 @@ function CapsulePanel() {
       .select('*')
       .eq('couple_id', coupleId)
       .order('unlock_at', { ascending: true });
-    if (data) setEntries(data);
-  }, [coupleId]);
+    if (data) {
+      setEntries(data);
+      loadUrls(data);
+    }
+  }, [coupleId, loadUrls]);
 
   useEffect(() => {
     load();
@@ -368,9 +386,7 @@ function CapsulePanel() {
     }
   }
 
-  function publicUrl(path: string) {
-    return supabase.storage.from('vinku-love-media').getPublicUrl(path).data.publicUrl;
-  }
+  // Eliminamos publicUrl porque ahora usamos photoUrls con URLs firmadas
 
   return (
     <ScrollView contentContainerStyle={styles.panelScroll}>
@@ -406,8 +422,8 @@ function CapsulePanel() {
               <Text style={styles.lockedText}>🔒 Se abre el {e.unlock_at.slice(0, 10)}</Text>
             ) : (
               <>
-                {e.photo_path && (
-                  <Image source={{ uri: publicUrl(e.photo_path) }} style={styles.capsuleImage} />
+                {e.photo_path && photoUrls[e.photo_path] && (
+                  <Image source={{ uri: photoUrls[e.photo_path] }} style={styles.capsuleImage} />
                 )}
                 {e.text && <Text style={styles.capsuleText}>{e.text}</Text>}
               </>

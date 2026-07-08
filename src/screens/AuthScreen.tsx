@@ -52,7 +52,8 @@ export function AuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brand}>🐣 Vinku-love</Text>
+      <Text style={styles.brand}>♥ Vinku-love</Text>
+      <Text style={styles.slogan}>Every heartbeat together.</Text>
       <Text style={styles.subtitle}>
         {mode === 'signUp' ? 'Crea tu cuenta para conectarte con tu pareja' : 'Inicia sesión'}
       </Text>
@@ -110,7 +111,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing(6),
   },
-  brand: { fontSize: 28, fontWeight: '800', color: colors.ink, textAlign: 'center', marginBottom: spacing(2) },
+  brand: { fontSize: 28, fontWeight: '800', color: colors.ink, textAlign: 'center', marginBottom: spacing(1) },
+  slogan: { fontSize: 14, fontWeight: '600', color: colors.coral, textAlign: 'center', marginBottom: spacing(4), fontStyle: 'italic' },
   subtitle: { fontSize: 13, color: colors.inkSoft, textAlign: 'center', marginBottom: spacing(8) },
   input: {
     backgroundColor: colors.surface,

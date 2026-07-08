@@ -1,3 +1,4 @@
+// @ts-nocheck
 // supabase/functions/notify-partner/index.ts
 // Deploy: supabase functions deploy notify-partner
 
@@ -14,9 +15,18 @@ type NotifyPayload = {
   data?: Record<string, unknown>; // Datos extras (opcional)
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
   }
 
   const supabase = createClient(
@@ -28,12 +38,12 @@ serve(async (req) => {
   try {
     payload = await req.json();
   } catch {
-    return new Response('Invalid JSON', { status: 400 });
+    return new Response('Invalid JSON', { status: 400, headers: corsHeaders });
   }
 
   const { sender_id, couple_id, title, body, data } = payload;
   if (!sender_id || !couple_id || !title || !body) {
-    return new Response('Missing fields', { status: 400 });
+    return new Response('Missing fields', { status: 400, headers: corsHeaders });
   }
 
   // 1) Buscar el profile_id del partner (no del que envía)
@@ -43,12 +53,12 @@ serve(async (req) => {
     .eq('couple_id', couple_id);
 
   if (membersError || !members || members.length < 2) {
-    return new Response('Couple not found or incomplete', { status: 404 });
+    return new Response('Couple not found or incomplete', { status: 404, headers: corsHeaders });
   }
 
-  const partnerProfileId = members.find((m) => m.profile_id !== sender_id)?.profile_id;
+  const partnerProfileId = members.find((m: any) => m.profile_id !== sender_id)?.profile_id;
   if (!partnerProfileId) {
-    return new Response('Partner not found', { status: 404 });
+    return new Response('Partner not found', { status: 404, headers: corsHeaders });
   }
 
   // 2) Buscar el push token del partner
@@ -62,7 +72,7 @@ serve(async (req) => {
     // El partner no tiene token: no es un error grave, simplemente no se notifica
     return new Response(JSON.stringify({ sent: false, reason: 'no_token' }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -85,6 +95,6 @@ serve(async (req) => {
 
   return new Response(JSON.stringify({ sent: true, expo: expoJson }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

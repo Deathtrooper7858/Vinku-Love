@@ -16,7 +16,7 @@ App móvil (React Native + Expo) con conexión real entre tú y tu pareja vía S
 
 ## 1) Configura Supabase (una sola vez)
 
-1. Crea un proyecto gratis en https://supabase.com si no tienes uno.
+1. Crea un proyecto gratis en <https://supabase.com> si no tienes uno.
 2. Ve a **SQL Editor** y pega el contenido completo de `supabase/schema.sql`. Ejecútalo.
    Esto crea todas las tablas (incluidas las nuevas: `daily_answers`, `capsule_entries`,
    `bucket_list_items`, `calendar_events`, `expenses`, `member_status`,
@@ -24,10 +24,12 @@ App móvil (React Native + Expo) con conexión real entre tú y tu pareja vía S
    `vinku-love-media` que usa la cápsula del tiempo para las fotos.
 3. Ve a **Project Settings → API** y copia `Project URL` y `anon public key`.
 4. Abre `app.json` y reemplaza:
+
    ```json
    "supabaseUrl": "PON_AQUI_TU_SUPABASE_URL",
    "supabaseAnonKey": "PON_AQUI_TU_SUPABASE_ANON_KEY",
    ```
+
 5. En **Authentication → Providers**, confirma que "Email" esté habilitado.
 
 ## 2) Instala dependencias y prueba en tu celular

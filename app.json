@@ -6,14 +6,18 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#12121A",
+    "icon": "./assets/logo.png",
     "splash": {
-      "backgroundColor": "#12121A"
+      "image": "./assets/logo.png",
+      "backgroundColor": "#12121A",
+      "resizeMode": "contain"
     },
     "assetBundlePatterns": ["**/*"],
     "android": {
       "package": "com.axel.vinkulove",
       "backgroundColor": "#12121A",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#12121A"
       }
     },
@@ -34,8 +38,6 @@
       ]
     ],
     "extra": {
-      "supabaseUrl": "PON_AQUI_TU_SUPABASE_URL",
-      "supabaseAnonKey": "PON_AQUI_TU_SUPABASE_ANON_KEY",
       "eas": {
         "projectId": "SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD"
       }

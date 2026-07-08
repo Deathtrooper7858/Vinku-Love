@@ -41,8 +41,9 @@ export async function registerPushToken(profileId: string): Promise<string | nul
 
   // Obtener token
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  const validProjectId = projectId && projectId !== 'SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD' ? projectId : undefined;
   const tokenData = await Notifications.getExpoPushTokenAsync(
-    projectId ? { projectId } : undefined
+    validProjectId ? { projectId: validProjectId } : undefined
   );
   const token = tokenData.data;
 

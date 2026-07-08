@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Image, Text } from 'react-native';
 import { Session } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
 import { supabase } from './src/lib/supabase';
@@ -12,13 +12,17 @@ import { CoupleProvider } from './src/context/CoupleContext';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [checkingCouple, setCheckingCouple] = useState(true);
-  const notifListener = useRef<any>();
-  const responseListener = useRef<any>();
+  const notifListener = useRef<any>(null);
+  const responseListener = useRef<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setIsReady(true);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => setSession(sess));
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -56,17 +60,29 @@ export default function App() {
     });
 
     return () => {
-      Notifications.removeNotificationSubscription(notifListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      notifListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, [session?.user?.id, coupleId]);
+
+  if (!isReady) {
+    return (
+      <View style={styles.loading}>
+        <Image source={require('./assets/logo.png')} style={styles.logo} />
+        <Text style={styles.slogan}>Conectando corazones</Text>
+        <ActivityIndicator color={colors.teal} size="large" style={{ marginTop: 20 }} />
+      </View>
+    );
+  }
 
   if (session === null) return <AuthScreen />;
 
   if (checkingCouple) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={colors.teal} size="large" />
+        <Image source={require('./assets/logo.png')} style={styles.logo} />
+        <Text style={styles.slogan}>Conectando corazones</Text>
+        <ActivityIndicator color={colors.teal} size="large" style={{ marginTop: 20 }} />
       </View>
     );
   }
@@ -84,4 +100,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   loading: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  logo: { width: 120, height: 120, resizeMode: 'contain', marginBottom: 16 },
+  slogan: { color: colors.ink, fontSize: 16, fontWeight: '500', textAlign: 'center', opacity: 0.8 },
 });

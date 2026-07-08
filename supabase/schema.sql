@@ -177,151 +177,183 @@ alter table public.pet_accessories_owned enable row level security;
 alter table public.push_tokens         enable row level security;
 
 -- profiles
-create policy if not exists "profiles: select own"
+drop policy if exists "profiles: select own" on public.profiles;
+create policy "profiles: select own"
   on public.profiles for select using (auth.uid() = id);
-create policy if not exists "profiles: insert own"
+drop policy if exists "profiles: insert own" on public.profiles;
+create policy "profiles: insert own"
   on public.profiles for insert with check (auth.uid() = id);
-create policy if not exists "profiles: update own"
+drop policy if exists "profiles: update own" on public.profiles;
+create policy "profiles: update own"
   on public.profiles for update using (auth.uid() = id);
 
 -- couple_members
-create policy if not exists "couple_members: select"
+drop policy if exists "couple_members: select" on public.couple_members;
+create policy "couple_members: select"
   on public.couple_members for select using (
     profile_id = auth.uid()
     or couple_id in (
       select couple_id from public.couple_members where profile_id = auth.uid()
     )
   );
-create policy if not exists "couple_members: insert own"
+drop policy if exists "couple_members: insert own" on public.couple_members;
+create policy "couple_members: insert own"
   on public.couple_members for insert with check (profile_id = auth.uid());
 
 -- couples
-create policy if not exists "couples: select if member"
+drop policy if exists "couples: select if member" on public.couples;
+create policy "couples: select if member"
   on public.couples for select using (
     id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "couples: insert authenticated"
+drop policy if exists "couples: insert authenticated" on public.couples;
+create policy "couples: insert authenticated"
   on public.couples for insert with check (auth.uid() is not null);
-create policy if not exists "couples: update if member"
+drop policy if exists "couples: update if member" on public.couples;
+create policy "couples: update if member"
   on public.couples for update using (
     id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- moods
-create policy if not exists "moods: select if member"
+drop policy if exists "moods: select if member" on public.moods;
+create policy "moods: select if member"
   on public.moods for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "moods: insert if member"
+drop policy if exists "moods: insert if member" on public.moods;
+create policy "moods: insert if member"
   on public.moods for insert with check (
     profile_id = auth.uid()
     and couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- missyou_taps
-create policy if not exists "missyou: select if member"
+drop policy if exists "missyou: select if member" on public.missyou_taps;
+create policy "missyou: select if member"
   on public.missyou_taps for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "missyou: insert if member"
+drop policy if exists "missyou: insert if member" on public.missyou_taps;
+create policy "missyou: insert if member"
   on public.missyou_taps for insert with check (
     profile_id = auth.uid()
     and couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- notes
-create policy if not exists "notes: select if member"
+drop policy if exists "notes: select if member" on public.notes;
+create policy "notes: select if member"
   on public.notes for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "notes: insert if member"
+drop policy if exists "notes: insert if member" on public.notes;
+create policy "notes: insert if member"
   on public.notes for insert with check (
     profile_id = auth.uid()
     and couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- daily_answers
-create policy if not exists "daily_answers: select if member"
+drop policy if exists "daily_answers: select if member" on public.daily_answers;
+create policy "daily_answers: select if member"
   on public.daily_answers for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "daily_answers: insert if member"
+drop policy if exists "daily_answers: insert if member" on public.daily_answers;
+create policy "daily_answers: insert if member"
   on public.daily_answers for insert with check (
     profile_id = auth.uid()
     and couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- capsule_entries
-create policy if not exists "capsule: select if member"
+drop policy if exists "capsule: select if member" on public.capsule_entries;
+create policy "capsule: select if member"
   on public.capsule_entries for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "capsule: insert if member"
+drop policy if exists "capsule: insert if member" on public.capsule_entries;
+create policy "capsule: insert if member"
   on public.capsule_entries for insert with check (
     profile_id = auth.uid()
     and couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- bucket_list_items
-create policy if not exists "bucket_list: select if member"
+drop policy if exists "bucket_list: select if member" on public.bucket_list_items;
+create policy "bucket_list: select if member"
   on public.bucket_list_items for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "bucket_list: insert if member"
+drop policy if exists "bucket_list: insert if member" on public.bucket_list_items;
+create policy "bucket_list: insert if member"
   on public.bucket_list_items for insert with check (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "bucket_list: update if member"
+drop policy if exists "bucket_list: update if member" on public.bucket_list_items;
+create policy "bucket_list: update if member"
   on public.bucket_list_items for update using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- calendar_events
-create policy if not exists "calendar: select if member"
+drop policy if exists "calendar: select if member" on public.calendar_events;
+create policy "calendar: select if member"
   on public.calendar_events for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "calendar: insert if member"
+drop policy if exists "calendar: insert if member" on public.calendar_events;
+create policy "calendar: insert if member"
   on public.calendar_events for insert with check (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "calendar: delete if member"
+drop policy if exists "calendar: delete if member" on public.calendar_events;
+create policy "calendar: delete if member"
   on public.calendar_events for delete using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- expenses
-create policy if not exists "expenses: select if member"
+drop policy if exists "expenses: select if member" on public.expenses;
+create policy "expenses: select if member"
   on public.expenses for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "expenses: insert if member"
+drop policy if exists "expenses: insert if member" on public.expenses;
+create policy "expenses: insert if member"
   on public.expenses for insert with check (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- member_status
-create policy if not exists "status: select if member"
+drop policy if exists "status: select if member" on public.member_status;
+create policy "status: select if member"
   on public.member_status for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "status: insert own"
+drop policy if exists "status: insert own" on public.member_status;
+create policy "status: insert own"
   on public.member_status for insert with check (profile_id = auth.uid());
-create policy if not exists "status: update own"
+drop policy if exists "status: update own" on public.member_status;
+create policy "status: update own"
   on public.member_status for update using (profile_id = auth.uid());
 
 -- pet_accessories_owned
-create policy if not exists "accessories: select if member"
+drop policy if exists "accessories: select if member" on public.pet_accessories_owned;
+create policy "accessories: select if member"
   on public.pet_accessories_owned for select using (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
-create policy if not exists "accessories: insert if member"
+drop policy if exists "accessories: insert if member" on public.pet_accessories_owned;
+create policy "accessories: insert if member"
   on public.pet_accessories_owned for insert with check (
     couple_id in (select couple_id from public.couple_members where profile_id = auth.uid())
   );
 
 -- push_tokens
-create policy if not exists "push_tokens: select own or partner"
+drop policy if exists "push_tokens: select own or partner" on public.push_tokens;
+create policy "push_tokens: select own or partner"
   on public.push_tokens for select using (
     profile_id = auth.uid()
     or profile_id in (
@@ -332,9 +364,11 @@ create policy if not exists "push_tokens: select own or partner"
       where cm1.profile_id = auth.uid()
     )
   );
-create policy if not exists "push_tokens: insert own"
+drop policy if exists "push_tokens: insert own" on public.push_tokens;
+create policy "push_tokens: insert own"
   on public.push_tokens for insert with check (profile_id = auth.uid());
-create policy if not exists "push_tokens: update own"
+drop policy if exists "push_tokens: update own" on public.push_tokens;
+create policy "push_tokens: update own"
   on public.push_tokens for update using (profile_id = auth.uid());
 
 
@@ -370,32 +404,58 @@ end $$;
 -- ============================================================
 
 insert into storage.buckets (id, name, public)
-values ('vinku-love-media', 'vinku-love-media', true)
+values ('vinku-love-media', 'vinku-love-media', false)
 on conflict (id) do nothing;
 
 do $$
 begin
-  -- Política de subida
+  -- Política de subida segura: solo pueden subir a la carpeta de su propia pareja
   if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename  = 'objects'
+      and policyname = 'media: members can upload'
+  ) then
+    create policy "media: members can upload"
+      on storage.objects for insert
+      with check (
+        bucket_id = 'vinku-love-media' 
+        and auth.uid() is not null
+        and (string_to_array(name, '/'))[1] in (select couple_id::text from public.couple_members where profile_id = auth.uid())
+      );
+  end if;
+
+  -- Eliminar la política insegura anterior si existe
+  if exists (
     select 1 from pg_policies
     where schemaname = 'storage'
       and tablename  = 'objects'
       and policyname = 'media: authenticated users can upload'
   ) then
-    create policy "media: authenticated users can upload"
-      on storage.objects for insert
-      with check (bucket_id = 'vinku-love-media' and auth.uid() is not null);
+    drop policy "media: authenticated users can upload" on storage.objects;
   end if;
 
-  -- Política de lectura
-  if not exists (
+  if exists (
     select 1 from pg_policies
     where schemaname = 'storage'
       and tablename  = 'objects'
       and policyname = 'media: anyone can view'
   ) then
-    create policy "media: anyone can view"
+    drop policy "media: anyone can view" on storage.objects;
+  end if;
+
+  -- Política de lectura segura: solo pueden leer archivos de su propia pareja
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename  = 'objects'
+      and policyname = 'media: members can view'
+  ) then
+    create policy "media: members can view"
       on storage.objects for select
-      using (bucket_id = 'vinku-love-media');
+      using (
+        bucket_id = 'vinku-love-media' 
+        and (string_to_array(name, '/'))[1] in (select couple_id::text from public.couple_members where profile_id = auth.uid())
+      );
   end if;
 end $$;

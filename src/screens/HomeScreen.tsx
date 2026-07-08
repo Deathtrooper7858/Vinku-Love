@@ -182,10 +182,10 @@ export function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.topbar}>
           <View style={styles.brandRow}>
-            <View style={styles.brandMark}>
-              <Text style={{ fontSize: 18 }}>🐣</Text>
+            <View>
+              <Text style={styles.brandName}>♥ Vinku-love</Text>
+              <Text style={styles.slogan}>Every heartbeat together.</Text>
             </View>
-            <Text style={styles.brandName}>Vinku-love</Text>
           </View>
         </View>
 
@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brandName: { color: colors.ink, fontWeight: '800', fontSize: 19 },
+  slogan: { fontSize: 11, fontWeight: '600', color: colors.coral, fontStyle: 'italic' },
   streakBanner: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
