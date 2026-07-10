@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors, radius, spacing } from '../theme';
 
@@ -94,6 +94,7 @@ export function CoupleSetupScreen({
   if (mode === 'created') {
     return (
       <View style={styles.container}>
+      <Image source={require('../../assets/logo.png')} style={styles.logo} />
         <Text style={styles.title}>Comparte este código</Text>
         <Text style={styles.subtitle}>Tu pareja debe ingresarlo para conectarse contigo</Text>
         <View style={styles.codeBox}>
@@ -108,6 +109,7 @@ export function CoupleSetupScreen({
   if (mode === 'join') {
     return (
       <View style={styles.container}>
+      <Image source={require('../../assets/logo.png')} style={styles.logo} />
         <Text style={styles.title}>Ingresa el código</Text>
         <Text style={styles.subtitle}>El que te compartió tu pareja</Text>
         <TextInput
@@ -132,6 +134,7 @@ export function CoupleSetupScreen({
 
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/logo.png')} style={styles.logo} />
       <Text style={styles.title}>Conéctate con tu pareja</Text>
       <Text style={styles.subtitle}>Uno crea el código, el otro lo ingresa. Así de simple.</Text>
       {error && <Text style={styles.error}>{error}</Text>}
@@ -147,6 +150,7 @@ export function CoupleSetupScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', paddingHorizontal: spacing(6) },
+  logo: { width: 100, height: 100, resizeMode: 'contain', alignSelf: 'center', marginBottom: spacing(3) },
   title: { fontSize: 22, fontWeight: '800', color: colors.ink, textAlign: 'center', marginBottom: spacing(2) },
   subtitle: { fontSize: 13, color: colors.inkSoft, textAlign: 'center', marginBottom: spacing(8) },
   codeBox: {

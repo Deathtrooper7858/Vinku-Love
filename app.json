@@ -12,14 +12,19 @@
       "backgroundColor": "#12121A",
       "resizeMode": "contain"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "package": "com.axel.vinkulove",
       "backgroundColor": "#12121A",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#12121A"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       [
@@ -39,8 +44,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD"
+        "projectId": "04484de8-22a7-46cd-b0f9-87bc189d3945"
       }
-    }
+    },
+    "owner": "deathtrooper"
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors, radius, spacing } from '../theme';
 
@@ -52,7 +52,7 @@ export function AuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brand}>♥ Vinku-love</Text>
+      <Image source={require('../../assets/logo.png')} style={styles.logo} />
       <Text style={styles.slogan}>Every heartbeat together.</Text>
       <Text style={styles.subtitle}>
         {mode === 'signUp' ? 'Crea tu cuenta para conectarte con tu pareja' : 'Inicia sesión'}
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing(6),
   },
-  brand: { fontSize: 28, fontWeight: '800', color: colors.ink, textAlign: 'center', marginBottom: spacing(1) },
+  logo: { width: 110, height: 110, resizeMode: 'contain', alignSelf: 'center', marginBottom: spacing(2) },
   slogan: { fontSize: 14, fontWeight: '600', color: colors.coral, textAlign: 'center', marginBottom: spacing(4), fontStyle: 'italic' },
   subtitle: { fontSize: 13, color: colors.inkSoft, textAlign: 'center', marginBottom: spacing(8) },
   input: {
