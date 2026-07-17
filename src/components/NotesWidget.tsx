@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
 
 export type Note = { id: string; fromMe: boolean; text: string };
 
@@ -12,6 +13,8 @@ export function NotesWidget({
   notes: Note[];
   onSend: (text: string) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [draft, setDraft] = useState('');
 
   function submit() {
@@ -58,7 +61,7 @@ export function NotesWidget({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   empty: { fontSize: 12, color: colors.inkSoft, textAlign: 'center', paddingVertical: spacing(2) },
   noteItem: {
     backgroundColor: colors.surfaceAlt,

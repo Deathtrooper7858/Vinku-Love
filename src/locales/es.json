@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Volver",
+    "done": "Listo"
+  },
+  "auth": {
+    "slogan": "Cada latido, juntos.",
+    "connecting": "Conectando corazones",
+    "login": "Iniciar sesión",
+    "signIn": "Inicia sesión",
+    "createAccount": "Crea tu cuenta para conectarte con tu pareja",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "namePlaceholder": "Tu nombre",
+    "enterBtn": "Entrar",
+    "createBtn": "Crear cuenta",
+    "alreadyHaveAccount": "¿Ya tienes cuenta? Inicia sesión",
+    "noAccount": "¿No tienes cuenta? Regístrate",
+    "errorEmailPassword": "Escribe tu correo y contraseña.",
+    "errorName": "Escribe tu nombre.",
+    "errorGeneric": "Algo salió mal. Intenta de nuevo."
+  },
+  "setup": {
+    "title": "Conéctate con tu pareja",
+    "subtitle": "Uno crea el código, el otro lo ingresa. Así de simple.",
+    "createCode": "Crear código",
+    "haveCode": "Tengo un código",
+    "shareCode": "Comparte este código",
+    "shareCodeSub": "Tu pareja debe ingresarlo para conectarse contigo",
+    "enterCode": "Ingresa el código",
+    "enterCodeSub": "El que te compartió tu pareja",
+    "connect": "Conectar",
+    "goBack": "Volver",
+    "waiting": "Esperando a que tu pareja se una..."
+  },
+  "home": {
+    "title": "Ahora",
+    "slogan": "Cada latido, juntos.",
+    "streak": "Días juntos en la app",
+    "syncNote": "Sincronizado en vivo con tu pareja a través de Supabase Realtime.",
+    "notif": {
+      "moodTitle": "Nuevo estado de ánimo 💭",
+      "moodBody": "Tu pareja cambió su ánimo a {{emoji}}",
+      "missYouTitle": "💌 Te extraña",
+      "missYouBody": "Tu pareja te mandó un toque {{icon}}"
+    }
+  },
+  "mural": {
+    "title": "Mural",
+    "notif": {
+      "noteTitle": "📝 Nueva nota",
+      "dailyTitle": "🌟 Pregunta del día",
+      "dailyBody": "Tu pareja ya respondió. ¡Responde tú para ver ambas respuestas!"
+    }
+  },
+  "plans": {
+    "title": "Planes",
+    "add": "Agregar Plan",
+    "tabs": {
+      "dates": "Citas",
+      "calendar": "Calendario",
+      "expenses": "Gastos",
+      "capsule": "Cápsula"
+    }
+  },
+  "pet": {
+    "title": "Migo",
+    "shopTitle": "Tienda de accesorios",
+    "maxLevel": "nivel máximo",
+    "equipped": "Equipado ✓",
+    "tapToEquip": "Tocar para usar"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "theme": "Tema",
+    "darkMode": "Oscuro",
+    "lightMode": "Claro",
+    "systemMode": "Sistema",
+    "language": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "signOut": "Cerrar sesión"
+  }
+}

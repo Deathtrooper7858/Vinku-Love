@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from './Card';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
 import { HAPTIC_PATTERNS, HapticPatternKey } from '../lib/haptics';
+import { useTheme } from '../context/ThemeProvider';
 
 export function MissYouWidget({
   total,
@@ -13,6 +14,8 @@ export function MissYouWidget({
   onTap: (pattern: HapticPatternKey) => void;
   disabled?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [pattern, setPattern] = useState<HapticPatternKey>('soft');
 
   return (
@@ -47,7 +50,7 @@ export function MissYouWidget({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   count: {
     fontSize: 40,
     fontWeight: '800',

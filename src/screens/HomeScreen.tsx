@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Battery from 'expo-battery';
 import { supabase } from '../lib/supabase';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
 import { useCouple } from '../context/CoupleContext';
 import { MoodWidget } from '../components/MoodWidget';
 import { MissYouWidget } from '../components/MissYouWidget';
@@ -11,9 +11,15 @@ import { PetWidget } from '../components/PetWidget';
 import { StatusWidget, ManualStatus } from '../components/StatusWidget';
 import { HapticPatternKey, playHapticPattern } from '../lib/haptics';
 import { notifyPartner } from '../lib/notifications';
+import { useTheme } from '../context/ThemeProvider';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export function HomeScreen() {
   const { userId, coupleId } = useCouple();
+  const { colors, mode } = useTheme();
+  const { t } = useTranslation();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [myMood, setMyMood] = useState<string | null>(null);
   const [partnerMood, setPartnerMood] = useState<string | null>(null);
   const [missYouTotal, setMissYouTotal] = useState(0);
@@ -150,8 +156,8 @@ export function HomeScreen() {
     notifyPartner({
       senderId: userId,
       coupleId,
-      title: 'Nuevo estado de ánimo 💭',
-      body: `Tu pareja cambió su ánimo a ${emoji}`,
+      title: t('home.notif.moodTitle', 'Nuevo estado de ánimo 💭'),
+      body: t('home.notif.moodBody', 'Tu pareja cambió su ánimo a {{emoji}}', { emoji }),
       data: { screen: 'Ahora' },
     });
   }
@@ -165,8 +171,8 @@ export function HomeScreen() {
     notifyPartner({
       senderId: userId,
       coupleId,
-      title: '💌 Te extraña',
-      body: `Tu pareja te mandó un toque ${patternLabel[pattern] ?? ''}`,
+      title: t('home.notif.missYouTitle', '💌 Te extraña'),
+      body: t('home.notif.missYouBody', 'Tu pareja te mandó un toque {{icon}}', { icon: patternLabel[pattern] ?? '' }),
       data: { screen: 'Ahora' },
     });
   }
@@ -178,26 +184,26 @@ export function HomeScreen() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar style="light" />
+      <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.topbar}>
+        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.topbar}>
           <View style={styles.brandRow}>
             <View>
               <Text style={styles.brandName}>♥ Vinku-love</Text>
-              <Text style={styles.slogan}>Every heartbeat together.</Text>
+              <Text style={styles.slogan}>{t('home.slogan', 'Every heartbeat together.')}</Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.streakBanner}>
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.streakBanner}>
           <View>
-            <Text style={styles.streakLabel}>Días juntos en la app</Text>
+            <Text style={styles.streakLabel}>{t('home.streak', 'Días juntos en la app')}</Text>
             <Text style={styles.streakNum}>{streakDays}</Text>
           </View>
           <Text style={{ fontSize: 26 }}>🔥</Text>
-        </View>
+        </Animated.View>
 
-        <View style={{ marginBottom: spacing(3) }}>
+        <Animated.View entering={FadeInDown.delay(300).springify()} style={{ marginBottom: spacing(3) }}>
           <StatusWidget
             myBattery={myBattery}
             myStatus={myStatus}
@@ -205,24 +211,26 @@ export function HomeScreen() {
             partnerStatus={partnerStatus}
             onChangeStatus={changeStatus}
           />
-        </View>
+        </Animated.View>
 
-        <View style={styles.row}>
+        <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.row}>
           <MoodWidget myMood={myMood} partnerMood={partnerMood} onPick={pickMood} />
-        </View>
+        </Animated.View>
 
-        <View style={[styles.row, { gap: spacing(3) }]}>
+        <Animated.View entering={FadeInDown.delay(500).springify()} style={[styles.row, { gap: spacing(3) }]}>
           <MissYouWidget total={missYouTotal} onTap={tapMissYou} />
           <PetWidget xp={petXp} equippedAccessory={equippedAccessory} />
-        </View>
+        </Animated.View>
 
-        <Text style={styles.footNote}>Sincronizado en vivo con tu pareja a través de Supabase Realtime.</Text>
+        <Animated.Text entering={FadeIn.delay(600)} style={styles.footNote}>
+          {t('home.syncNote', 'Sincronizado en vivo con tu pareja a través de Supabase Realtime.')}
+        </Animated.Text>
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: spacing(4), paddingBottom: spacing(12) },
   topbar: { marginBottom: spacing(4) },

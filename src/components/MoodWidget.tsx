@@ -1,7 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from './Card';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
 
 const MOODS = ['🥰', '😊', '😐', '😔', '😴', '😤', '🥳'];
 
@@ -14,6 +15,8 @@ export function MoodWidget({
   partnerMood: string | null;
   onPick: (emoji: string) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   return (
     <Card title="Estado de ánimo" style={{ flex: 1 }}>
       <View style={styles.row}>
@@ -41,7 +44,7 @@ export function MoodWidget({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-around' },
   col: { alignItems: 'center' },
   who: { fontSize: 11, fontWeight: '800', color: colors.inkSoft, marginBottom: spacing(1.5) },

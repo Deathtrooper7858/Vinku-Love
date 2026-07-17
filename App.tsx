@@ -9,6 +9,9 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { CoupleSetupScreen } from './src/screens/CoupleSetupScreen';
 import { RootTabs } from './src/navigation/RootTabs';
 import { CoupleProvider } from './src/context/CoupleContext';
+import './src/lib/i18n';
+import { ThemeProvider } from './src/context/ThemeProvider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -92,9 +95,13 @@ export default function App() {
   }
 
   return (
-    <CoupleProvider userId={session.user.id} coupleId={coupleId}>
-      <RootTabs />
-    </CoupleProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <CoupleProvider userId={session.user.id} coupleId={coupleId}>
+          <RootTabs />
+        </CoupleProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 

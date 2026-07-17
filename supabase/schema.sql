@@ -459,3 +459,24 @@ begin
       );
   end if;
 end $$;
+- -   T r i g g e r   p a r a   c r e a r   p e r f i l   e n   a u t h . u s e r s 
+ c r e a t e   o r   r e p l a c e   f u n c t i o n   p u b l i c . h a n d l e _ n e w _ u s e r ( ) 
+ r e t u r n s   t r i g g e r 
+ l a n g u a g e   p l p g s q l 
+ s e c u r i t y   d e f i n e r   s e t   s e a r c h _ p a t h   =   p u b l i c 
+ a s   \ $ \ $ 
+ b e g i n 
+     i n s e r t   i n t o   p u b l i c . p r o f i l e s   ( i d ,   d i s p l a y _ n a m e ) 
+     v a l u e s   ( 
+         n e w . i d , 
+         c o a l e s c e ( n e w . r a w _ u s e r _ m e t a _ d a t a - > > ' d i s p l a y _ n a m e ' ,   ' S i n   n o m b r e ' ) 
+     ) ; 
+     r e t u r n   n e w ; 
+ e n d ; 
+ \ $ \ $ ; 
+ 
+ d r o p   t r i g g e r   i f   e x i s t s   o n _ a u t h _ u s e r _ c r e a t e d   o n   a u t h . u s e r s ; 
+ c r e a t e   t r i g g e r   o n _ a u t h _ u s e r _ c r e a t e d 
+     a f t e r   i n s e r t   o n   a u t h . u s e r s 
+     f o r   e a c h   r o w   e x e c u t e   p r o c e d u r e   p u b l i c . h a n d l e _ n e w _ u s e r ( ) ;  
+ 

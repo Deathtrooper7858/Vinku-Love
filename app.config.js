@@ -27,7 +27,7 @@ export default {
     slug: "vinku-love",
     version: "1.0.0",
     orientation: "portrait",
-    userInterfaceStyle: "dark",
+    userInterfaceStyle: "automatic",
     backgroundColor: "#12121A",
     icon: "./assets/logo.png",
     splash: {
@@ -59,11 +59,13 @@ export default {
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
+          "icon": "./assets/logo.png",
           "color": "#FF8B7E",
           "androidMode": "default"
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-image"
     ],
     extra: {
       eas: {

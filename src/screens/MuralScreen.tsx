@@ -1,15 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
 import { useCouple } from '../context/CoupleContext';
 import { NotesWidget, Note } from '../components/NotesWidget';
 import { DailyQuestionCard } from '../components/DailyQuestionCard';
 import { getPromptForDate } from '../data/dailyPrompts';
 import { notifyPartner } from '../lib/notifications';
+import { useTheme } from '../context/ThemeProvider';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export function MuralScreen() {
   const { userId, coupleId } = useCouple();
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [myAnswer, setMyAnswer] = useState<string | null>(null);
   const [partnerAnswer, setPartnerAnswer] = useState<string | null>(null);
@@ -73,7 +79,7 @@ export function MuralScreen() {
     notifyPartner({
       senderId: userId,
       coupleId,
-      title: '📝 Nueva nota',
+      title: t('mural.notif.noteTitle', '📝 Nueva nota'),
       body: text.length > 60 ? text.slice(0, 57) + '…' : text,
       data: { screen: 'Mural' },
     });
@@ -91,8 +97,8 @@ export function MuralScreen() {
     notifyPartner({
       senderId: userId,
       coupleId,
-      title: '🌟 Pregunta del día',
-      body: 'Tu pareja ya respondió. ¡Responde tú para ver ambas respuestas!',
+      title: t('mural.notif.dailyTitle', '🌟 Pregunta del día'),
+      body: t('mural.notif.dailyBody', 'Tu pareja ya respondió. ¡Responde tú para ver ambas respuestas!'),
       data: { screen: 'Mural' },
     });
   }
@@ -100,8 +106,10 @@ export function MuralScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.header}>El Mural</Text>
-        <View style={{ marginBottom: spacing(3) }}>
+        <Animated.Text entering={FadeInDown.delay(100).springify()} style={styles.header}>
+          {t('mural.title', 'El Mural')}
+        </Animated.Text>
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={{ marginBottom: spacing(3) }}>
           <DailyQuestionCard
             promptText={promptText}
             myAnswer={myAnswer}
@@ -109,14 +117,16 @@ export function MuralScreen() {
             partnerAnswerText={partnerAnswer}
             onSubmit={submitAnswer}
           />
-        </View>
-        <NotesWidget notes={notes} onSend={sendNote} />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(300).springify()}>
+          <NotesWidget notes={notes} onSend={sendNote} />
+        </Animated.View>
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: spacing(4), paddingBottom: spacing(12) },
   header: { color: colors.ink, fontSize: 20, fontWeight: '800', marginBottom: spacing(4) },

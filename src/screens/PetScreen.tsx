@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useCouple } from '../context/CoupleContext';
 import { Card } from '../components/Card';
 import { Pet, stageForXp } from '../components/Pet';
@@ -9,6 +12,9 @@ import { ACCESSORY_CATALOG, accessoryEmoji } from '../data/accessories';
 
 export function PetScreen() {
   const { coupleId } = useCouple();
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [xp, setXp] = useState(0);
   const [equipped, setEquipped] = useState<string | null>(null);
   const [owned, setOwned] = useState<string[]>([]);
@@ -76,9 +82,11 @@ export function PetScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}>
-      <Text style={styles.header}>Migo</Text>
+      <Animated.Text entering={FadeInDown.delay(100).springify()} style={styles.header}>
+        {t('pet.title', 'Migo')}
+      </Animated.Text>
 
-      <View style={styles.petStageBox}>
+      <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.petStageBox}>
         <View>
           <Pet stage={stage.key} size={160} />
           {accessoryEmoji(equipped) && <Text style={styles.bigAccessory}>{accessoryEmoji(equipped)}</Text>}
@@ -88,11 +96,12 @@ export function PetScreen() {
           <View style={[styles.fill, { width: `${pct}%` }]} />
         </View>
         <Text style={styles.xpLabel}>
-          {stage.key === 'adult' ? `${xp} XP · nivel máximo` : `${xp} / ${stage.threshold} XP`}
+          {stage.key === 'adult' ? `${xp} XP · ${t('pet.maxLevel', 'nivel máximo')}` : `${xp} / ${stage.threshold} XP`}
         </Text>
-      </View>
+      </Animated.View>
 
-      <Card title="Tienda de accesorios" style={{ width: '100%' }}>
+      <Animated.View entering={FadeInDown.delay(300).springify()} style={{ width: '100%' }}>
+        <Card title={t('pet.shopTitle', 'Tienda de accesorios')} style={{ width: '100%' }}>
         <Text style={styles.shopHint}>
           Los accesorios se compran con el XP acumulado por los dos. Toca uno que ya tengan para
           equiparlo o quitarlo.
@@ -116,18 +125,19 @@ export function PetScreen() {
                 <Text style={{ fontSize: 28 }}>{acc.emoji}</Text>
                 <Text style={styles.accessoryLabel}>{acc.label}</Text>
                 <Text style={styles.accessoryCost}>
-                  {isOwned ? (isEquipped ? 'Equipado ✓' : 'Tocar para usar') : `${acc.cost} XP`}
+                  {isOwned ? (isEquipped ? t('pet.equipped', 'Equipado ✓') : t('pet.tapToEquip', 'Tocar para usar')) : `${acc.cost} XP`}
                 </Text>
               </Pressable>
             );
           })}
         </View>
       </Card>
+      </Animated.View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: spacing(4), paddingBottom: spacing(12), alignItems: 'center' },
   header: { color: colors.ink, fontSize: 20, fontWeight: '800', marginBottom: spacing(4), alignSelf: 'flex-start' },

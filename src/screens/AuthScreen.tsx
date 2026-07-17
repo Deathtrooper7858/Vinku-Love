@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export function AuthScreen() {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,11 +20,11 @@ export function AuthScreen() {
   async function submit() {
     setError(null);
     if (!email.trim() || !password.trim()) {
-      setError('Escribe tu correo y contraseña.');
+      setError(t('auth.errorEmailPassword', 'Escribe tu correo y contraseña.'));
       return;
     }
     if (mode === 'signUp' && !name.trim()) {
-      setError('Escribe tu nombre.');
+      setError(t('auth.errorName', 'Escribe tu nombre.'));
       return;
     }
     setLoading(true);
@@ -27,15 +33,14 @@ export function AuthScreen() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password,
+          options: {
+            data: {
+              display_name: name.trim(),
+            },
+          },
         });
         if (signUpError) throw signUpError;
-        if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
-            id: data.user.id,
-            display_name: name.trim(),
-          });
-          if (profileError) throw profileError;
-        }
+        // El perfil se creará automáticamente en Supabase usando un Trigger.
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -44,7 +49,7 @@ export function AuthScreen() {
         if (signInError) throw signInError;
       }
     } catch (e: any) {
-      setError(e.message ?? 'Algo salió mal. Intenta de nuevo.');
+      setError(e.message ?? t('auth.errorGeneric', 'Algo salió mal. Intenta de nuevo.'));
     } finally {
       setLoading(false);
     }
@@ -52,59 +57,69 @@ export function AuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.slogan}>Every heartbeat together.</Text>
-      <Text style={styles.subtitle}>
-        {mode === 'signUp' ? 'Crea tu cuenta para conectarte con tu pareja' : 'Inicia sesión'}
-      </Text>
+      <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: 'center' }}>
+        <Image source={require('../../assets/logo.png')} style={styles.logo} />
+        <Text style={styles.slogan}>{t('auth.slogan', 'Every heartbeat together.')}</Text>
+        <Text style={styles.subtitle}>
+          {mode === 'signUp' ? t('auth.createAccount', 'Crea tu cuenta para conectarte con tu pareja') : t('auth.signIn', 'Inicia sesión')}
+        </Text>
+      </Animated.View>
 
       {mode === 'signUp' && (
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <TextInput
+            placeholder={t('auth.namePlaceholder', 'Tu nombre')}
+            placeholderTextColor={colors.inkFaint}
+            value={name}
+            onChangeText={setName}
+            style={styles.input}
+          />
+        </Animated.View>
+      )}
+      <Animated.View entering={FadeInDown.delay(150).springify()}>
         <TextInput
-          placeholder="Tu nombre"
+          placeholder={t('auth.email', 'Correo')}
           placeholderTextColor={colors.inkFaint}
-          value={name}
-          onChangeText={setName}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
           style={styles.input}
         />
-      )}
-      <TextInput
-        placeholder="Correo"
-        placeholderTextColor={colors.inkFaint}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Contraseña"
-        placeholderTextColor={colors.inkFaint}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(200).springify()}>
+        <TextInput
+          placeholder={t('auth.password', 'Contraseña')}
+          placeholderTextColor={colors.inkFaint}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+        />
+      </Animated.View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Animated.Text entering={FadeIn} style={styles.error}>{error}</Animated.Text>}
 
-      <Pressable style={styles.primaryBtn} onPress={submit} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color={colors.bg} />
-        ) : (
-          <Text style={styles.primaryBtnText}>{mode === 'signUp' ? 'Crear cuenta' : 'Entrar'}</Text>
-        )}
-      </Pressable>
+      <Animated.View entering={FadeInDown.delay(250).springify()}>
+        <Pressable style={styles.primaryBtn} onPress={submit} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color={colors.bg} />
+          ) : (
+            <Text style={styles.primaryBtnText}>{mode === 'signUp' ? t('auth.createBtn', 'Crear cuenta') : t('auth.enterBtn', 'Entrar')}</Text>
+          )}
+        </Pressable>
 
-      <Pressable onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
-        <Text style={styles.switchText}>
-          {mode === 'signUp' ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
-        </Text>
-      </Pressable>
+        <Pressable onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
+          <Text style={styles.switchText}>
+            {mode === 'signUp' ? t('auth.alreadyHaveAccount', '¿Ya tienes cuenta? Inicia sesión') : t('auth.noAccount', '¿No tienes cuenta? Regístrate')}
+          </Text>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

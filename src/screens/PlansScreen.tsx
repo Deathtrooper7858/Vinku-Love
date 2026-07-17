@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
 import { useCouple } from '../context/CoupleContext';
 import { Card } from '../components/Card';
 
@@ -25,6 +26,8 @@ const SEGMENTS: { key: Segment; label: string }[] = [
 ];
 
 export function PlansScreen() {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [segment, setSegment] = useState<Segment>('citas');
 
   return (
@@ -51,6 +54,8 @@ export function PlansScreen() {
 // ---------- Citas pendientes (Bucket list) ----------
 function BucketListPanel() {
   const { userId, coupleId } = useCouple();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [items, setItems] = useState<any[]>([]);
   const [draft, setDraft] = useState('');
 
@@ -120,6 +125,8 @@ function BucketListPanel() {
 // ---------- Calendario de eventos importantes ----------
 function CalendarPanel() {
   const { userId, coupleId } = useCouple();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [events, setEvents] = useState<any[]>([]);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -207,6 +214,8 @@ function CalendarPanel() {
 // ---------- Gastos compartidos ----------
 function ExpensesPanel() {
   const { userId, coupleId } = useCouple();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
@@ -300,6 +309,8 @@ function ExpensesPanel() {
 // ---------- Cápsula del tiempo ----------
 function CapsulePanel() {
   const { userId, coupleId } = useCouple();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [entries, setEntries] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [unlockDate, setUnlockDate] = useState('');
@@ -435,7 +446,7 @@ function CapsulePanel() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   segmentRow: {
     flexDirection: 'row',

@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "done": "Done"
+  },
+  "auth": {
+    "slogan": "Every heartbeat together.",
+    "connecting": "Connecting hearts",
+    "login": "Login",
+    "signIn": "Sign in",
+    "createAccount": "Create your account to connect with your partner",
+    "email": "Email",
+    "password": "Password",
+    "namePlaceholder": "Your name",
+    "enterBtn": "Enter",
+    "createBtn": "Create account",
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "noAccount": "Don't have an account? Sign up",
+    "errorEmailPassword": "Please enter your email and password.",
+    "errorName": "Please enter your name.",
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+  "setup": {
+    "title": "Connect with your partner",
+    "subtitle": "One creates the code, the other enters it. Simple.",
+    "createCode": "Create code",
+    "haveCode": "I have a code",
+    "shareCode": "Share this code",
+    "shareCodeSub": "Your partner must enter it to connect with you",
+    "enterCode": "Enter the code",
+    "enterCodeSub": "The one your partner shared with you",
+    "connect": "Connect",
+    "goBack": "Go back",
+    "waiting": "Waiting for your partner to join..."
+  },
+  "home": {
+    "title": "Now",
+    "slogan": "Every heartbeat together.",
+    "streak": "Days together in the app",
+    "syncNote": "Synced live with your partner via Supabase Realtime.",
+    "notif": {
+      "moodTitle": "New mood 💭",
+      "moodBody": "Your partner changed their mood to {{emoji}}",
+      "missYouTitle": "💌 Missing you",
+      "missYouBody": "Your partner sent you a tap {{icon}}"
+    }
+  },
+  "mural": {
+    "title": "Mural",
+    "notif": {
+      "noteTitle": "📝 New note",
+      "dailyTitle": "🌟 Daily question",
+      "dailyBody": "Your partner already answered. Answer yours to see both!"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "add": "Add Plan",
+    "tabs": {
+      "dates": "Dates",
+      "calendar": "Calendar",
+      "expenses": "Expenses",
+      "capsule": "Capsule"
+    }
+  },
+  "pet": {
+    "title": "Migo",
+    "shopTitle": "Accessories shop",
+    "maxLevel": "max level",
+    "equipped": "Equipped ✓",
+    "tapToEquip": "Tap to use"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "darkMode": "Dark",
+    "lightMode": "Light",
+    "systemMode": "System",
+    "language": "Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "signOut": "Sign out"
+  }
+}

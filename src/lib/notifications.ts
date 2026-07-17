@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -40,19 +42,24 @@ export async function registerPushToken(profileId: string): Promise<string | nul
   }
 
   // Obtener token
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  const validProjectId = projectId && projectId !== 'SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD' ? projectId : undefined;
-  const tokenData = await Notifications.getExpoPushTokenAsync(
-    validProjectId ? { projectId: validProjectId } : undefined
-  );
-  const token = tokenData.data;
+  try {
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    const validProjectId = projectId && projectId !== 'SE_GENERA_AUTOMATICO_AL_CORRER_EAS_BUILD' ? projectId : undefined;
+    const tokenData = await Notifications.getExpoPushTokenAsync(
+      validProjectId ? { projectId: validProjectId } : undefined
+    );
+    const token = tokenData.data;
 
-  // Guardar en Supabase (upsert: actualiza si ya existe)
-  await supabase
-    .from('push_tokens')
-    .upsert({ profile_id: profileId, token, updated_at: new Date().toISOString() });
+    // Guardar en Supabase (upsert: actualiza si ya existe)
+    await supabase
+      .from('push_tokens')
+      .upsert({ profile_id: profileId, token, updated_at: new Date().toISOString() });
 
-  return token;
+    return token;
+  } catch (err) {
+    console.warn('[Vinku-love] Error obteniendo push token (¿Falta google-services.json?):', err);
+    return null;
+  }
 }
 
 /**

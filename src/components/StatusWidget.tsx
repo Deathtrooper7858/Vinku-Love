@@ -1,7 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from './Card';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
 
 export type ManualStatus = 'libre' | 'ocupado' | 'durmiendo' | 'silencio';
 
@@ -32,6 +33,8 @@ export function StatusWidget({
   partnerStatus: string | null;
   onChangeStatus: (status: ManualStatus) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   return (
     <Card title="Estado" style={{ width: '100%' }}>
       <View style={styles.row}>
@@ -67,7 +70,7 @@ export function StatusWidget({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: spacing(3) },
   col: { alignItems: 'center' },
   who: { fontSize: 11, fontWeight: '800', color: colors.inkSoft, marginBottom: spacing(1) },

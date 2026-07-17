@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card } from './Card';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeProvider';
 
 export function DailyQuestionCard({
   promptText,
@@ -16,6 +17,8 @@ export function DailyQuestionCard({
   partnerAnswerText: string | null;
   onSubmit: (text: string) => Promise<void>;
 }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -73,7 +76,7 @@ export function DailyQuestionCard({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   prompt: { color: colors.ink, fontSize: 15, fontWeight: '700', marginBottom: spacing(3), lineHeight: 21 },
   input: {
     backgroundColor: colors.surfaceAlt,

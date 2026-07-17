@@ -2,10 +2,13 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card } from './Card';
 import { Pet, stageForXp } from './Pet';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
 import { accessoryEmoji } from '../data/accessories';
+import { useTheme } from '../context/ThemeProvider';
 
 export function PetWidget({ xp, equippedAccessory }: { xp: number; equippedAccessory?: string | null }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => getStyles(colors), [colors]);
   const stage = stageForXp(xp);
   const pct =
     stage.key === 'adult'
@@ -33,7 +36,7 @@ export function PetWidget({ xp, equippedAccessory }: { xp: number; equippedAcces
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   wrap: { alignItems: 'center' },
   accessory: { position: 'absolute', top: -6, right: -6, fontSize: 22 },
   stageLabel: { color: colors.ink, fontWeight: '800', fontSize: 15, marginTop: spacing(1) },
