@@ -1,24 +1,26 @@
 import React from 'react';
-import { StyleSheet, Text, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '../theme';
 import { useTheme } from '../context/ThemeProvider';
 
-export function Card({
-  title,
-  children,
-  style,
-  gradient,
-  borderColor,
-  titleColor,
-}: {
+interface GradientCardProps {
   title?: string;
   children: React.ReactNode;
   style?: ViewStyle;
   gradient?: string[];
   borderColor?: string;
   titleColor?: string;
-}) {
+}
+
+export function GradientCard({
+  title,
+  children,
+  style,
+  gradient,
+  borderColor,
+  titleColor,
+}: GradientCardProps) {
   const { colors, mode } = useTheme();
   const isDark = mode === 'dark' || mode === 'system';
 
@@ -29,22 +31,6 @@ export function Card({
   const resolvedGradient = gradient ?? defaultGradient;
   const resolvedBorder = borderColor ?? (isDark ? '#3A3060' : '#E8DAFB');
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    card: {
-      borderRadius: radius.lg,
-      padding: spacing(4),
-      borderWidth: 1,
-    },
-    title: {
-      fontSize: 11,
-      fontWeight: '800' as const,
-      letterSpacing: 0.8,
-      textTransform: 'uppercase' as const,
-      color: titleColor ?? colors.inkSoft,
-      marginBottom: spacing(3),
-    },
-  }), [colors, titleColor]);
-
   return (
     <LinearGradient
       colors={resolvedGradient as [string, string, ...string[]]}
@@ -52,8 +38,32 @@ export function Card({
       end={{ x: 1, y: 1 }}
       style={[styles.card, { borderColor: resolvedBorder }, style]}
     >
-      {title && <Text style={styles.title}>{title}</Text>}
+      {title && (
+        <Text
+          style={[
+            styles.title,
+            { color: titleColor ?? colors.inkSoft },
+          ]}
+        >
+          {title}
+        </Text>
+      )}
       {children}
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: radius.lg,
+    padding: spacing(4),
+    borderWidth: 1,
+  },
+  title: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: spacing(3),
+  },
+});

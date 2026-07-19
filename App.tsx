@@ -17,6 +17,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [coupleId, setCoupleId] = useState<string | null>(null);
+  const [isSoloMode, setIsSoloMode] = useState(false);
   const [checkingCouple, setCheckingCouple] = useState(true);
   const notifListener = useRef<any>(null);
   const responseListener = useRef<any>(null);
@@ -41,8 +42,18 @@ export default function App() {
       .select('couple_id')
       .eq('profile_id', session.user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        setCoupleId(data?.couple_id ?? null);
+      .then(async ({ data }) => {
+        if (data?.couple_id) {
+          setCoupleId(data.couple_id);
+          const { count } = await supabase
+            .from('couple_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('couple_id', data.couple_id);
+          setIsSoloMode(count === 1);
+        } else {
+          setCoupleId(null);
+          setIsSoloMode(false);
+        }
         setCheckingCouple(false);
       });
   }, [session?.user?.id]);
@@ -91,13 +102,13 @@ export default function App() {
   }
 
   if (!coupleId) {
-    return <CoupleSetupScreen userId={session.user.id} onCoupleReady={setCoupleId} />;
+    return <CoupleSetupScreen userId={session.user.id} onCoupleReady={(id: string, solo: boolean) => { setCoupleId(id); setIsSoloMode(solo); }} />;
   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <CoupleProvider userId={session.user.id} coupleId={coupleId}>
+        <CoupleProvider userId={session.user.id} coupleId={coupleId} isSoloMode={isSoloMode}>
           <RootTabs />
         </CoupleProvider>
       </ThemeProvider>

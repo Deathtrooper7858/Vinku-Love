@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import * as Battery from 'expo-battery';
 import { supabase } from '../lib/supabase';
-import { radius, spacing } from '../theme';
+import { radius, spacing, GRADIENTS } from '../theme';
 import { useCouple } from '../context/CoupleContext';
 import { MoodWidget } from '../components/MoodWidget';
 import { MissYouWidget } from '../components/MissYouWidget';
@@ -16,10 +17,11 @@ import { useTranslation } from 'react-i18next';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export function HomeScreen() {
-  const { userId, coupleId } = useCouple();
+  const { userId, coupleId, isSoloMode } = useCouple();
   const { colors, mode } = useTheme();
   const { t } = useTranslation();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [myMood, setMyMood] = useState<string | null>(null);
   const [partnerMood, setPartnerMood] = useState<string | null>(null);
   const [missYouTotal, setMissYouTotal] = useState(0);
@@ -183,8 +185,8 @@ export function HomeScreen() {
   }
 
   return (
-    <View style={styles.screen}>
-      <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+    <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.screen}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.topbar}>
           <View style={styles.brandRow}>
@@ -195,12 +197,29 @@ export function HomeScreen() {
           </View>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.streakBanner}>
-          <View>
-            <Text style={styles.streakLabel}>{t('home.streak', 'Días juntos en la app')}</Text>
-            <Text style={styles.streakNum}>{streakDays}</Text>
-          </View>
-          <Text style={{ fontSize: 26 }}>🔥</Text>
+        {isSoloMode && (
+          <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.soloBanner}>
+            <LinearGradient colors={GRADIENTS.purple} style={styles.soloGradient} start={{x:0, y:0}} end={{x:1, y:1}}>
+              <Text style={{ fontSize: 20, marginBottom: spacing(2) }}>✨</Text>
+              <Text style={styles.soloBannerTitle}>{t('home.soloTitle', 'Tu pareja aún no se une')}</Text>
+              <Text style={styles.soloBannerSub}>
+                {t('home.soloSub', 'Puedes ir explorando la app. Cuando tu pareja use el código, ¡todo se sincronizará mágicamente!')}
+              </Text>
+            </LinearGradient>
+          </Animated.View>
+        )}
+
+        <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <LinearGradient
+            colors={isDark ? ['#1A1A2E', '#16132E'] as [string, string] : ['#FFFFFF', '#F5EEFF'] as [string, string]}
+            style={styles.streakBanner}
+          >
+            <View>
+              <Text style={styles.streakLabel}>{t('home.streak', 'Días juntos en la app')}</Text>
+              <Text style={styles.streakNum}>{streakDays}</Text>
+            </View>
+            <Animated.Text entering={FadeIn.delay(500)} style={{ fontSize: 32 }}>🔥</Animated.Text>
+          </LinearGradient>
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(300).springify()} style={{ marginBottom: spacing(3) }}>
@@ -226,14 +245,14 @@ export function HomeScreen() {
           {t('home.syncNote', 'Sincronizado en vivo con tu pareja a través de Supabase Realtime.')}
         </Animated.Text>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  scroll: { padding: spacing(4), paddingBottom: spacing(12) },
-  topbar: { marginBottom: spacing(4) },
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+  screen: { flex: 1 },
+  scroll: { padding: spacing(4), paddingTop: Platform.OS === 'ios' ? spacing(12) : spacing(10), paddingBottom: spacing(24) },
+  topbar: { marginBottom: spacing(6), paddingHorizontal: spacing(2) },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   brandMark: {
     width: 36,
@@ -243,21 +262,24 @@ const getStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  brandName: { color: colors.ink, fontWeight: '800', fontSize: 19 },
-  slogan: { fontSize: 11, fontWeight: '600', color: colors.coral, fontStyle: 'italic' },
+  brandName: { color: colors.ink, fontWeight: '900', fontSize: 22, letterSpacing: -0.5 },
+  slogan: { fontSize: 12, fontWeight: '600', color: colors.coral, fontStyle: 'italic', marginTop: 2 },
+  soloBanner: { marginBottom: spacing(4), borderRadius: radius.lg, overflow: 'hidden' },
+  soloGradient: { padding: spacing(4) },
+  soloBannerTitle: { color: '#FFF', fontWeight: '900', fontSize: 16, marginBottom: spacing(1) },
+  soloBannerSub: { color: 'rgba(255,255,255,0.9)', fontSize: 13, lineHeight: 18 },
   streakBanner: {
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     padding: spacing(4),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing(4),
   },
-  streakLabel: { fontSize: 11, color: colors.inkSoft, fontWeight: '700', marginBottom: 2 },
-  streakNum: { fontSize: 24, fontWeight: '800', color: colors.coralDark },
+  streakLabel: { fontSize: 12, color: colors.inkSoft, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: spacing(1) },
+  streakNum: { fontSize: 32, fontWeight: '900', color: colors.coralDark },
   row: { flexDirection: 'row', marginBottom: spacing(3) },
   footNote: { textAlign: 'center', color: colors.inkFaint, fontSize: 10.5, marginTop: spacing(4) },
 });

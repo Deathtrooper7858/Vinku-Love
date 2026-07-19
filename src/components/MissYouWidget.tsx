@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Card } from './Card';
-import { radius, spacing } from '../theme';
+import { radius, spacing, GRADIENTS } from '../theme';
 import { HAPTIC_PATTERNS, HapticPatternKey } from '../lib/haptics';
 import { useTheme } from '../context/ThemeProvider';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence } from 'react-native-reanimated';
 
 export function MissYouWidget({
   total,
@@ -14,9 +16,20 @@ export function MissYouWidget({
   onTap: (pattern: HapticPatternKey) => void;
   disabled?: boolean;
 }) {
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [pattern, setPattern] = useState<HapticPatternKey>('soft');
+  
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }));
+
+  const handleTap = () => {
+    scale.value = withSequence(withSpring(0.9), withSpring(1.1), withSpring(1));
+    onTap(pattern);
+  };
 
   return (
     <Card title="Te extraño" style={{ flex: 1 }}>
@@ -24,73 +37,97 @@ export function MissYouWidget({
       <Text style={styles.sub}>veces en total</Text>
 
       <View style={styles.patternRow}>
-        {HAPTIC_PATTERNS.map((p) => (
-          <Pressable
-            key={p.key}
-            onPress={() => setPattern(p.key)}
-            style={[styles.patternChip, pattern === p.key && styles.patternChipSelected]}
-          >
-            <Text style={{ fontSize: 13 }}>{p.emoji}</Text>
-          </Pressable>
-        ))}
+        {HAPTIC_PATTERNS.map((p) => {
+          const isSelected = pattern === p.key;
+          return (
+            <Pressable key={p.key} onPress={() => setPattern(p.key)}>
+              <LinearGradient
+                colors={isSelected ? GRADIENTS.gold : [colors.surfaceAlt, colors.surfaceAlt]}
+                style={[styles.patternChip, isSelected && styles.patternChipSelected]}
+              >
+                <Text style={{ fontSize: 13 }}>{p.emoji}</Text>
+              </LinearGradient>
+            </Pressable>
+          );
+        })}
       </View>
 
-      <Pressable
-        onPress={() => onTap(pattern)}
-        disabled={disabled}
-        style={({ pressed }) => [
-          styles.btn,
-          pressed && { transform: [{ scale: 0.96 }] },
-          disabled && { opacity: 0.5 },
-        ]}
-      >
-        <Text style={styles.btnText}>💌  Enviar</Text>
-      </Pressable>
+      <Animated.View style={animatedStyle}>
+        <Pressable
+          onPress={handleTap}
+          disabled={disabled}
+          style={({ pressed }) => [
+            pressed && { opacity: 0.9 },
+            disabled && { opacity: 0.5 },
+          ]}
+        >
+          <LinearGradient
+            colors={GRADIENTS.heart}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.btn}
+          >
+            <Text style={styles.btnText}>💌 Enviar</Text>
+          </LinearGradient>
+        </Pressable>
+      </Animated.View>
     </Card>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   count: {
-    fontSize: 40,
-    fontWeight: '800',
-    color: colors.coralDark,
+    fontSize: 48,
+    fontWeight: '900',
+    color: colors.coral,
     textAlign: 'center',
     marginTop: spacing(1),
+    textShadowColor: isDark ? 'rgba(255, 107, 157, 0.3)' : 'transparent',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 12,
   },
   sub: {
-    fontSize: 11,
+    fontSize: 12,
     color: colors.inkSoft,
-    fontWeight: '700',
+    fontWeight: '800',
     textAlign: 'center',
-    marginBottom: spacing(3),
+    marginBottom: spacing(4),
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   patternRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
-    marginBottom: spacing(3),
+    gap: 8,
+    marginBottom: spacing(4),
   },
   patternChip: {
-    width: 30,
-    height: 30,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surfaceAlt,
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
   },
   patternChipSelected: {
-    backgroundColor: colors.gold,
+    borderColor: 'transparent',
+    transform: [{ scale: 1.1 }],
   },
   btn: {
-    backgroundColor: colors.coral,
-    borderRadius: radius.md,
-    paddingVertical: spacing(3),
+    borderRadius: radius.pill,
+    paddingVertical: spacing(3.5),
     alignItems: 'center',
+    shadowColor: colors.coral,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   btnText: {
-    color: '#1A1210',
-    fontWeight: '800',
-    fontSize: 14,
+    color: '#FFF',
+    fontWeight: '900',
+    fontSize: 15,
+    letterSpacing: 0.5,
   },
 });

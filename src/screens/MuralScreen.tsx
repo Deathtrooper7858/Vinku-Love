@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from '../lib/supabase';
-import { spacing } from '../theme';
+import { spacing, GRADIENTS } from '../theme';
 import { useCouple } from '../context/CoupleContext';
 import { NotesWidget, Note } from '../components/NotesWidget';
 import { DailyQuestionCard } from '../components/DailyQuestionCard';
@@ -13,9 +14,11 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export function MuralScreen() {
   const { userId, coupleId } = useCouple();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const { t } = useTranslation();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [myAnswer, setMyAnswer] = useState<string | null>(null);
   const [partnerAnswer, setPartnerAnswer] = useState<string | null>(null);
@@ -104,7 +107,7 @@ export function MuralScreen() {
   }
 
   return (
-    <View style={styles.screen}>
+    <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.Text entering={FadeInDown.delay(100).springify()} style={styles.header}>
           {t('mural.title', 'El Mural')}
@@ -122,12 +125,12 @@ export function MuralScreen() {
           <NotesWidget notes={notes} onSend={sendNote} />
         </Animated.View>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  scroll: { padding: spacing(4), paddingBottom: spacing(12) },
-  header: { color: colors.ink, fontSize: 20, fontWeight: '800', marginBottom: spacing(4) },
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+  screen: { flex: 1 },
+  scroll: { padding: spacing(4), paddingTop: Platform.OS === 'ios' ? spacing(12) : spacing(10), paddingBottom: spacing(24) },
+  header: { color: colors.ink, fontSize: 24, fontWeight: '900', marginBottom: spacing(4) },
 });

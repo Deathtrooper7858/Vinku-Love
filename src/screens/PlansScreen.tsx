@@ -8,10 +8,12 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
-import { radius, spacing } from '../theme';
+import { radius, spacing, GRADIENTS } from '../theme';
 import { useTheme } from '../context/ThemeProvider';
 import { useCouple } from '../context/CoupleContext';
 import { Card } from '../components/Card';
@@ -26,20 +28,25 @@ const SEGMENTS: { key: Segment; label: string }[] = [
 ];
 
 export function PlansScreen() {
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [segment, setSegment] = useState<Segment>('citas');
 
   return (
-    <View style={styles.screen}>
+    <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.screen}>
       <View style={styles.segmentRow}>
         {SEGMENTS.map((s) => (
           <Pressable
             key={s.key}
             onPress={() => setSegment(s.key)}
-            style={[styles.segmentChip, segment === s.key && styles.segmentChipActive]}
           >
-            <Text style={[styles.segmentText, segment === s.key && styles.segmentTextActive]}>{s.label}</Text>
+            <LinearGradient
+              colors={segment === s.key ? GRADIENTS.teal : [colors.surface, colors.surface]}
+              style={[styles.segmentChip, segment === s.key && styles.segmentChipActive]}
+            >
+              <Text style={[styles.segmentText, segment === s.key && { color: '#FFF' }]}>{s.label}</Text>
+            </LinearGradient>
           </Pressable>
         ))}
       </View>
@@ -47,15 +54,16 @@ export function PlansScreen() {
       {segment === 'calendario' && <CalendarPanel />}
       {segment === 'gastos' && <ExpensesPanel />}
       {segment === 'capsula' && <CapsulePanel />}
-    </View>
+    </LinearGradient>
   );
 }
 
 // ---------- Citas pendientes (Bucket list) ----------
 function BucketListPanel() {
   const { userId, coupleId } = useCouple();
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [items, setItems] = useState<any[]>([]);
   const [draft, setDraft] = useState('');
 
@@ -125,8 +133,9 @@ function BucketListPanel() {
 // ---------- Calendario de eventos importantes ----------
 function CalendarPanel() {
   const { userId, coupleId } = useCouple();
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [events, setEvents] = useState<any[]>([]);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -214,8 +223,9 @@ function CalendarPanel() {
 // ---------- Gastos compartidos ----------
 function ExpensesPanel() {
   const { userId, coupleId } = useCouple();
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
@@ -309,8 +319,9 @@ function ExpensesPanel() {
 // ---------- Cápsula del tiempo ----------
 function CapsulePanel() {
   const { userId, coupleId } = useCouple();
-  const { colors } = useTheme();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
   const [entries, setEntries] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [unlockDate, setUnlockDate] = useState('');
@@ -446,9 +457,10 @@ function CapsulePanel() {
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+  screen: { flex: 1 },
   segmentRow: {
+    paddingTop: Platform.OS === 'ios' ? spacing(12) : spacing(10),
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
@@ -463,10 +475,9 @@ const getStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  segmentChipActive: { backgroundColor: colors.teal, borderColor: colors.teal },
+  segmentChipActive: { borderColor: 'transparent' },
   segmentText: { color: colors.inkSoft, fontWeight: '800', fontSize: 12 },
-  segmentTextActive: { color: '#0A1F1C' },
-  panelScroll: { padding: spacing(4), paddingBottom: spacing(12) },
+  panelScroll: { padding: spacing(4), paddingBottom: spacing(24) },
   formRow: { flexDirection: 'row', gap: 8 },
   input: {
     flex: 1,

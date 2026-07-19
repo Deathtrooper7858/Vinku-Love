@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from '../lib/supabase';
-import { radius, spacing } from '../theme';
+import { radius, spacing, GRADIENTS } from '../theme';
 import { useTheme } from '../context/ThemeProvider';
 import { useTranslation } from 'react-i18next';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, Layout } from 'react-native-reanimated';
 
 function generateCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin caracteres ambiguos
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
@@ -18,12 +19,13 @@ export function CoupleSetupScreen({
   onCoupleReady,
 }: {
   userId: string;
-  onCoupleReady: (coupleId: string) => void;
+  onCoupleReady: (coupleId: string, isSolo: boolean) => void;
 }) {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const { t } = useTranslation();
-  const styles = React.useMemo(() => getStyles(colors), [colors]);
-  const [mode, setMode] = useState<'choose' | 'created' | 'join'>('choose');
+  const isDark = mode === 'dark' || mode === 'system';
+  const styles = React.useMemo(() => getStyles(colors, isDark), [colors, isDark]);
+  const [setupMode, setSetupMode] = useState<'choose' | 'created' | 'join'>('choose');
   const [myCode, setMyCode] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,9 +43,8 @@ export function CoupleSetupScreen({
 
       setMyCode(code);
       setPendingCoupleId(coupleId);
-      setMode('created');
+      setSetupMode('created');
 
-      // Espera a que la pareja se una (polling ligero)
       const interval = setInterval(async () => {
         const { data: members } = await supabase
           .from('couple_members')
@@ -51,7 +52,7 @@ export function CoupleSetupScreen({
           .eq('couple_id', coupleId);
         if (members && members.length >= 2) {
           clearInterval(interval);
-          onCoupleReady(coupleId);
+          onCoupleReady(coupleId, false);
         }
       }, 3000);
     } catch (e: any) {
@@ -70,7 +71,7 @@ export function CoupleSetupScreen({
       
       if (error) throw error;
 
-      onCoupleReady(coupleId);
+      onCoupleReady(coupleId, false);
     } catch (e: any) {
       setError(e.message ?? 'No se pudo unir a la pareja.');
     } finally {
@@ -78,55 +79,72 @@ export function CoupleSetupScreen({
     }
   }
 
-  if (mode === 'created') {
+  if (setupMode === 'created') {
     return (
-      <View style={styles.container}>
+      <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.container}>
         <Animated.View entering={FadeIn.duration(500)} style={{ alignItems: 'center' }}>
           <Image source={require('../../assets/logo.png')} style={styles.logo} />
           <Text style={styles.title}>{t('setup.shareCode', 'Comparte este código')}</Text>
           <Text style={styles.subtitle}>{t('setup.shareCodeSub', 'Tu pareja debe ingresarlo para conectarse contigo')}</Text>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.codeBox}>
-          <Text style={styles.codeText}>{myCode}</Text>
+        <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <LinearGradient colors={isDark ? ['rgba(255,255,255,0.05)', 'rgba(0,0,0,0.2)'] as [string, string] : ['rgba(255,255,255,0.8)', 'rgba(255,255,255,0.5)'] as [string, string]} style={styles.codeBox}>
+            <Text style={styles.codeText}>{myCode}</Text>
+          </LinearGradient>
         </Animated.View>
         <ActivityIndicator color={colors.teal} style={{ marginTop: spacing(6) }} />
         <Text style={styles.waiting}>{t('setup.waiting', 'Esperando a que tu pareja se una...')}</Text>
-      </View>
+        
+        <Animated.View entering={FadeInDown.delay(400).springify()}>
+          <Pressable 
+            style={[styles.primaryBtn, { marginTop: spacing(8) }]} 
+            onPress={() => pendingCoupleId && onCoupleReady(pendingCoupleId, true)}
+          >
+            <LinearGradient colors={GRADIENTS.purple} style={styles.primaryGradient} start={{x:0, y:0}} end={{x:1, y:1}}>
+              <Text style={styles.primaryBtnText}>{t('setup.enterSolo', 'Entrar a la app mientras espero')}</Text>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
+      </LinearGradient>
     );
   }
 
-  if (mode === 'join') {
+  if (setupMode === 'join') {
     return (
-      <View style={styles.container}>
-        <Animated.View entering={FadeIn.duration(500)} style={{ alignItems: 'center' }}>
-          <Image source={require('../../assets/logo.png')} style={styles.logo} />
-          <Text style={styles.title}>{t('setup.enterCode', 'Ingresa el código')}</Text>
-          <Text style={styles.subtitle}>{t('setup.enterCodeSub', 'El que te compartió tu pareja')}</Text>
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <TextInput
-            value={joinCode}
-            onChangeText={setJoinCode}
-            placeholder="EJ: A3F7K9"
-            placeholderTextColor={colors.inkFaint}
-            autoCapitalize="characters"
-            maxLength={6}
-            style={styles.input}
-          />
-          {error && <Text style={styles.error}>{error}</Text>}
-          <Pressable style={styles.primaryBtn} onPress={joinCouple} disabled={loading}>
-            {loading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.primaryBtnText}>{t('setup.connect', 'Conectar')}</Text>}
-          </Pressable>
-          <Pressable onPress={() => setMode('choose')}>
-            <Text style={styles.switchText}>{t('setup.goBack', 'Volver')}</Text>
-          </Pressable>
-        </Animated.View>
-      </View>
+      <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{flex: 1, justifyContent: 'center'}}>
+          <Animated.View entering={FadeIn.duration(500)} style={{ alignItems: 'center' }}>
+            <Image source={require('../../assets/logo.png')} style={styles.logo} />
+            <Text style={styles.title}>{t('setup.enterCode', 'Ingresa el código')}</Text>
+            <Text style={styles.subtitle}>{t('setup.enterCodeSub', 'El que te compartió tu pareja')}</Text>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <TextInput
+              value={joinCode}
+              onChangeText={setJoinCode}
+              placeholder="EJ: A3F7K9"
+              placeholderTextColor={colors.inkFaint}
+              autoCapitalize="characters"
+              maxLength={6}
+              style={styles.input}
+            />
+            {error && <Text style={styles.error}>{error}</Text>}
+            <Pressable style={styles.primaryBtn} onPress={joinCouple} disabled={loading}>
+              <LinearGradient colors={GRADIENTS.purple} style={styles.primaryGradient} start={{x:0, y:0}} end={{x:1, y:1}}>
+                {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryBtnText}>{t('setup.connect', 'Conectar')}</Text>}
+              </LinearGradient>
+            </Pressable>
+            <Pressable onPress={() => setSetupMode('choose')}>
+              <Text style={styles.switchText}>{t('setup.goBack', 'Volver')}</Text>
+            </Pressable>
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={isDark ? GRADIENTS.bgDark : GRADIENTS.bgLight} style={styles.container}>
       <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: 'center' }}>
         <Image source={require('../../assets/logo.png')} style={styles.logo} />
         <Text style={styles.title}>{t('setup.title', 'Conéctate con tu pareja')}</Text>
@@ -135,60 +153,75 @@ export function CoupleSetupScreen({
       {error && <Text style={styles.error}>{error}</Text>}
       <Animated.View entering={FadeInDown.delay(300).springify()}>
         <Pressable style={styles.primaryBtn} onPress={createCouple} disabled={loading}>
-          {loading ? <ActivityIndicator color={colors.bg} /> : <Text style={styles.primaryBtnText}>{t('setup.createCode', 'Crear código')}</Text>}
+          <LinearGradient colors={GRADIENTS.purple} style={styles.primaryGradient} start={{x:0, y:0}} end={{x:1, y:1}}>
+            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryBtnText}>{t('setup.createCode', 'Crear código')}</Text>}
+          </LinearGradient>
         </Pressable>
-        <Pressable style={styles.secondaryBtn} onPress={() => setMode('join')}>
+        <Pressable style={styles.secondaryBtn} onPress={() => setSetupMode('join')}>
           <Text style={styles.secondaryBtnText}>{t('setup.haveCode', 'Tengo un código')}</Text>
         </Pressable>
       </Animated.View>
-    </View>
+    </LinearGradient>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center', paddingHorizontal: spacing(6) },
-  logo: { width: 100, height: 100, resizeMode: 'contain', alignSelf: 'center', marginBottom: spacing(3) },
-  title: { fontSize: 22, fontWeight: '800', color: colors.ink, textAlign: 'center', marginBottom: spacing(2) },
-  subtitle: { fontSize: 13, color: colors.inkSoft, textAlign: 'center', marginBottom: spacing(8) },
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing(6) },
+  logo: { width: 120, height: 120, resizeMode: 'contain', alignSelf: 'center', marginBottom: spacing(3) },
+  title: { fontSize: 24, fontWeight: '900', color: colors.ink, textAlign: 'center', marginBottom: spacing(2) },
+  subtitle: { fontSize: 14, color: colors.inkSoft, textAlign: 'center', marginBottom: spacing(8), fontWeight: '600' },
   codeBox: {
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     paddingVertical: spacing(6),
     alignItems: 'center',
+    shadowColor: colors.purple,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  codeText: { fontSize: 34, fontWeight: '800', color: colors.gold, letterSpacing: 6 },
-  waiting: { color: colors.inkSoft, fontSize: 12, textAlign: 'center', marginTop: spacing(3), fontWeight: '700' },
+  codeText: { fontSize: 40, fontWeight: '900', color: colors.coral, letterSpacing: 8 },
+  waiting: { color: colors.inkSoft, fontSize: 13, textAlign: 'center', marginTop: spacing(3), fontWeight: '800' },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
     paddingHorizontal: spacing(4),
     paddingVertical: spacing(3.5),
     color: colors.ink,
-    fontSize: 20,
+    fontSize: 24,
     textAlign: 'center',
-    letterSpacing: 4,
+    letterSpacing: 6,
     marginBottom: spacing(3),
+    fontWeight: '800',
   },
-  error: { color: colors.danger, fontSize: 12, marginBottom: spacing(3), textAlign: 'center' },
+  error: { color: colors.danger, fontSize: 12, marginBottom: spacing(3), textAlign: 'center', fontWeight: '800' },
   primaryBtn: {
-    backgroundColor: colors.coral,
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+    marginBottom: spacing(3),
+    shadowColor: colors.purple,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryGradient: {
     paddingVertical: spacing(3.5),
     alignItems: 'center',
-    marginBottom: spacing(3),
   },
-  primaryBtnText: { color: colors.bg, fontWeight: '800', fontSize: 15 },
+  primaryBtnText: { color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 0.5 },
   secondaryBtn: {
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
     paddingVertical: spacing(3.5),
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
   },
-  secondaryBtnText: { color: colors.ink, fontWeight: '800', fontSize: 14 },
-  switchText: { color: colors.inkSoft, textAlign: 'center', fontSize: 12, fontWeight: '700', marginTop: spacing(3) },
+  secondaryBtnText: { color: colors.ink, fontWeight: '800', fontSize: 15 },
+  switchText: { color: colors.inkSoft, textAlign: 'center', fontSize: 13, fontWeight: '800', marginTop: spacing(4) },
 });
